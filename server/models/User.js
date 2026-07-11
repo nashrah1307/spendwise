@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Email is required"],
-    unique: true,       // no two users can have the same email
+    unique: true,
     lowercase: true,
     trim: true,
   },
@@ -23,6 +23,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  // ── NEW: profile fields ──────────────────────────────────────────────────
+  phone: { type: String, default: "", trim: true },
+  location: { type: String, default: "", trim: true },
+  dob: { type: String, default: "" }, // stored as "YYYY-MM-DD" string
+  bio: { type: String, default: "", trim: true, maxlength: 300 },
   currency: {
     type: String,
     default: "INR",
@@ -33,23 +38,15 @@ const UserSchema = new mongoose.Schema({
     default: "free",
   },
 }, {
-  timestamps: true, // auto adds createdAt and updatedAt fields
+  timestamps: true,
 })
 
-// ── Hash password before saving ────────────────────────────────────────────
-// This runs automatically every time a user is saved
-// We NEVER store plain text passwords in the database
 UserSchema.pre("save", async function () {
-  // Only hash if password was changed (not on every save)
   if (!this.isModified("password")) return
-
-  const salt = await bcrypt.genSalt(10) // generate a random salt
-  this.password = await bcrypt.hash(this.password, salt) // hash the password
-  // next()
+  const salt = await bcrypt.genSalt(10)
+  this.password = await bcrypt.hash(this.password, salt)
 })
 
-// ── Method to compare passwords on login ──────────────────────────────────
-// We call this when user tries to log in
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password)
 }

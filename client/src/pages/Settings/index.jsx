@@ -1,10 +1,26 @@
 import { useState } from "react"
-import Sidebar from "../../components/Sidebar";
-import Topbar from "../../components/Topbar";
+import { useNavigate } from "react-router-dom"
+import Sidebar from "../../components/Sidebar"
+import TopBar from "../../components/Topbar"
 import {
   Bell, Moon, Globe, Shield, Trash2,
   ChevronRight, Check, ToggleLeft, ToggleRight
 } from "lucide-react"
+
+// ── Load settings from localStorage or use defaults ────────────────────────
+const loadSettings = () => {
+  try {
+    const saved = localStorage.getItem("spendwise_settings")
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return {
+    emailNotifs: true, pushNotifs: false, budgetAlerts: true,
+    weeklyReport: true, monthlyReport: true,
+    darkMode: true, compactView: false,
+    currency: "INR", language: "English", dateFormat: "DD/MM/YYYY",
+    twoFactor: false, dataSharing: false,
+  }
+}
 
 function Toggle({ value, onChange }) {
   return (
@@ -40,28 +56,44 @@ function SectionCard({ title, icon: Icon, children }) {
 }
 
 export default function Settings() {
-  const [settings, setSettings] = useState({
-    emailNotifs: true, pushNotifs: false, budgetAlerts: true,
-    weeklyReport: true, monthlyReport: true,
-    darkMode: true, compactView: false,
-    currency: "INR", language: "English", dateFormat: "DD/MM/YYYY",
-    twoFactor: false, dataSharing: false,
-  })
-  const [saved, setSaved] = useState(false)
+  const navigate = useNavigate()
+  const [settings, setSettings] = useState(loadSettings)
+  const [saved, setSaved]       = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const update = (k, v) => setSettings(s => ({ ...s, [k]: v }))
 
+  // ── Save to localStorage ───────────────────────────────────────────────────
   const handleSave = () => {
+    localStorage.setItem("spendwise_settings", JSON.stringify(settings))
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
+  }
+
+  // ── Export all data ────────────────────────────────────────────────────────
+  const handleExport = () => {
+    const user = localStorage.getItem("spendwise_user") || "{}"
+    const blob = new Blob([user], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "spendwise_data.json"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // ── Delete account ─────────────────────────────────────────────────────────
+  const handleDeleteAccount = () => {
+    localStorage.removeItem("spendwise_user")
+    localStorage.removeItem("spendwise_auth")
+    localStorage.removeItem("spendwise_settings")
+    navigate("/")
   }
 
   const selectStyle = {
     background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
     borderRadius: 8, color: "#d1d5db", padding: "7px 12px", fontSize: 13,
-    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", outline: "none",
-    minWidth: 130
+    cursor: "pointer", fontFamily: "'DM Sans', sans-serif", outline: "none", minWidth: 130
   }
 
   return (
@@ -79,13 +111,13 @@ export default function Settings() {
       <Sidebar />
 
       <main style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
-        <Topbar title="Settings" subtitle="Manage your app preferences">
-          <button onClick={handleSave} style={{ background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif', display:'flex', alignItems:'center', gap:6", boxShadow: "0 4px 14px rgba(124,58,237,0.3)", transition: "all 0.2s" }}
+        <TopBar title="Settings" subtitle="Manage your app preferences">
+          <button onClick={handleSave} style={{ background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", boxShadow: "0 4px 14px rgba(124,58,237,0.3)", transition: "all 0.2s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
             Save Changes
           </button>
-        </Topbar>
+        </TopBar>
 
         {/* Toast */}
         {saved && (
@@ -97,7 +129,6 @@ export default function Settings() {
 
         <div className="page-animate" style={{ padding: 28, maxWidth: 760 }}>
 
-          {/* ── Notifications ── */}
           <SectionCard title="Notifications" icon={Bell}>
             <SettingRow label="Email Notifications" desc="Receive weekly summaries and alerts via email">
               <Toggle value={settings.emailNotifs} onChange={v => update("emailNotifs", v)} />
@@ -116,7 +147,6 @@ export default function Settings() {
             </SettingRow>
           </SectionCard>
 
-          {/* ── Appearance ── */}
           <SectionCard title="Appearance" icon={Moon}>
             <SettingRow label="Dark Mode" desc="Use dark theme across the app">
               <Toggle value={settings.darkMode} onChange={v => update("darkMode", v)} />
@@ -126,7 +156,6 @@ export default function Settings() {
             </SettingRow>
           </SectionCard>
 
-          {/* ── Preferences ── */}
           <SectionCard title="Preferences" icon={Globe}>
             <SettingRow label="Currency" desc="Default currency for all transactions">
               <select style={selectStyle} value={settings.currency} onChange={e => update("currency", e.target.value)}>
@@ -152,7 +181,6 @@ export default function Settings() {
             </SettingRow>
           </SectionCard>
 
-          {/* ── Privacy ── */}
           <SectionCard title="Privacy & Security" icon={Shield}>
             <SettingRow label="Two-Factor Authentication" desc="Add an extra layer of security to your account">
               <Toggle value={settings.twoFactor} onChange={v => update("twoFactor", v)} />
@@ -167,7 +195,7 @@ export default function Settings() {
             </SettingRow>
           </SectionCard>
 
-          {/* ── Danger zone ── */}
+          {/* Danger zone */}
           <div style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 16, padding: "22px 24px" }}>
             <div style={{ fontWeight: 700, fontSize: 15, color: "#f87171", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
               <Trash2 size={16} /> Danger Zone
@@ -176,16 +204,16 @@ export default function Settings() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0", borderBottom: "1px solid rgba(239,68,68,0.08)" }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#d1d5db" }}>Export All Data</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>Download all your transactions and reports as a ZIP file</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>Download your account data as a JSON file</div>
                 </div>
-                <button style={{ fontSize: 12, fontWeight: 600, color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
+                <button onClick={handleExport} style={{ fontSize: 12, fontWeight: 600, color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
                   Export
                 </button>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16 }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#f87171" }}>Delete Account</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>Permanently delete your account and all associated data</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>Permanently delete your account and all data</div>
                 </div>
                 <button onClick={() => setShowDeleteModal(true)} style={{ fontSize: 12, fontWeight: 700, color: "#fff", background: "rgba(239,68,68,0.7)", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s" }}
                   onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.9)"}
@@ -198,7 +226,6 @@ export default function Settings() {
         </div>
       </main>
 
-      {/* ── Delete confirm modal ── */}
       {showDeleteModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
           <div style={{ background: "#0d0b1f", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 16, padding: 28, width: "100%", maxWidth: 400, animation: "modalPop 0.25s ease", textAlign: "center" }}>
@@ -206,10 +233,10 @@ export default function Settings() {
               <Trash2 size={24} color="#f87171" />
             </div>
             <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Delete Account?</h3>
-            <p style={{ color: "#9ca3af", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>This will permanently delete all your data including transactions, budgets, and reports. This cannot be undone.</p>
+            <p style={{ color: "#9ca3af", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>This will permanently delete all your data. This cannot be undone.</p>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setShowDeleteModal(false)} style={{ flex: 1, padding: "11px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 9, color: "#d1d5db", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Cancel</button>
-              <button style={{ flex: 1, padding: "11px", background: "rgba(239,68,68,0.85)", border: "none", borderRadius: 9, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Yes, Delete</button>
+              <button onClick={handleDeleteAccount} style={{ flex: 1, padding: "11px", background: "rgba(239,68,68,0.85)", border: "none", borderRadius: 9, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Yes, Delete</button>
             </div>
           </div>
         </div>

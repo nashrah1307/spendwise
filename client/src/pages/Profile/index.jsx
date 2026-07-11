@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import Sidebar from "../../components/Sidebar"
 import TopBar from "../../components/Topbar"
 import { authAPI, transactionAPI, budgetAPI } from "../../services/api"
@@ -25,19 +24,19 @@ function StatCard({ label, value, color }) {
   )
 }
 
+// ── Get initials from name ─────────────────────────────────────────────────
+function getInitials(name = "") {
+  return name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "U"
+}
+
 export default function Profile() {
-  const navigate = useNavigate()
-
-  // ── Load user from localStorage ──
-  const storedUser = JSON.parse(localStorage.getItem("spendwise_user") || "{}")
-
   const [editing, setEditing]   = useState(false)
   const [saved, setSaved]       = useState(false)
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState(null)
+  const [saveError, setSaveError] = useState("")
+  const [stats, setStats]       = useState({ transactions: 0, months: 0, saved: 0, budgets: 0 })
 
-  // ── Real stats from API ──
-  const [stats, setStats] = useState({ transactions: 0, months: 0, saved: 0, budgets: 0 })
+  // ── Load real user from localStorage ──────────────────────────────────────
+  const storedUser = JSON.parse(localStorage.getItem("spendwise_user") || "{}")
 
   const [form, setForm] = useState({
     name:     storedUser.name     || "",
@@ -49,7 +48,7 @@ export default function Profile() {
   })
   const [draft, setDraft] = useState({ ...form })
 
-  // ── Fetch real stats on mount ──
+  // ── Fetch real stats ───────────────────────────────────────────────────────
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -57,14 +56,10 @@ export default function Profile() {
           transactionAPI.getAll(),
           budgetAPI.getAll(),
         ])
-
         const txs = txRes.data
-        const budgets = budgetRes.data
-
-        // Calculate total saved (sum of all income - expense)
         const totalIncome  = txs.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0)
         const totalExpense = txs.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0)
-        const totalSaved   = totalIncome - totalExpense
+        const saved = totalIncome - totalExpense
 
         // Count unique months with transactions
         const months = new Set(txs.map(t => t.date?.substring(0, 7))).size
@@ -72,8 +67,8 @@ export default function Profile() {
         setStats({
           transactions: txs.length,
           months,
-          saved: totalSaved,
-          budgets: budgets.length,
+          saved: saved > 0 ? `₹${(saved / 100000).toFixed(1)}L` : "₹0",
+          budgets: budgetRes.data.length,
         })
       } catch (err) {
         console.error("Failed to load stats:", err)
@@ -83,24 +78,18 @@ export default function Profile() {
   }, [])
 
   const handleSave = async () => {
-    setLoading(true)
-    setError(null)
+    setSaveError("")
     try {
       const res = await authAPI.updateProfile({
         name:     draft.name,
         email:    draft.email,
-        currency: storedUser.currency || "INR",
-      })
-
-      // Update localStorage with new user data
-      const updatedUser = {
-        ...storedUser,
-        ...res.data,
         phone:    draft.phone,
         location: draft.location,
         dob:      draft.dob,
         bio:      draft.bio,
-      }
+      })
+      // Update localStorage with new user data
+      const updatedUser = { ...storedUser, ...res.data, phone: draft.phone, location: draft.location, dob: draft.dob, bio: draft.bio }
       localStorage.setItem("spendwise_user", JSON.stringify(updatedUser))
 
       setForm({ ...draft })
@@ -108,26 +97,12 @@ export default function Profile() {
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update profile")
-    } finally {
-      setLoading(false)
+      setSaveError(err.response?.data?.message || "Failed to save profile")
     }
   }
 
-  const handleCancel = () => { setDraft({ ...form }); setEditing(false); setError(null) }
+  const handleCancel = () => { setDraft({ ...form }); setEditing(false); setSaveError("") }
   const update = (k, v) => setDraft(d => ({ ...d, [k]: v }))
-
-  // ── Avatar initials ──
-  const initials = form.name
-    ? form.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-    : "?"
-
-  // ── Format saved amount ──
-  const formatSaved = (amount) => {
-    if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)}L`
-    if (amount >= 1000)   return `₹${(amount / 1000).toFixed(1)}k`
-    return `₹${amount}`
-  }
 
   return (
     <div style={{ background: "#08080f", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#fff", display: "flex" }}>
@@ -155,11 +130,11 @@ export default function Profile() {
             </div>
           )}
 
-          {/* ── Profile header ── */}
+          {/* ── Profile header card ── */}
           <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "28px", marginBottom: 20, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
               <div style={{ width: 88, height: 88, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 28, color: "#fff", border: "3px solid rgba(124,58,237,0.4)" }}>
-                {initials}
+                {getInitials(form.name)}
               </div>
               <button style={{ position: "absolute", bottom: 0, right: 0, width: 28, height: 28, background: "#7c3aed", border: "2px solid #08080f", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                 <Camera size={13} color="#fff" />
@@ -167,7 +142,7 @@ export default function Profile() {
             </div>
 
             <div style={{ flex: 1, minWidth: 200 }}>
-              <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>{form.name || "Your Name"}</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>{form.name || "User"}</h2>
               <div style={{ fontSize: 14, color: "#9ca3af", marginBottom: 10 }}>{form.email}</div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 100, background: "rgba(124,58,237,0.15)", color: "#a78bfa", border: "1px solid rgba(124,58,237,0.3)" }}>
@@ -188,12 +163,12 @@ export default function Profile() {
             </button>
           </div>
 
-          {/* ── Real stats ── */}
+          {/* ── Stats row — real data ── */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))", gap: 14, marginBottom: 20 }}>
-            <StatCard label="Transactions"   value={stats.transactions}       color="#a78bfa" />
-            <StatCard label="Months Tracked" value={stats.months}             color="#06b6d4" />
-            <StatCard label="Total Saved"    value={formatSaved(stats.saved)} color="#34d399" />
-            <StatCard label="Budgets Set"    value={stats.budgets}            color="#f59e0b" />
+            <StatCard label="Transactions"   value={stats.transactions} color="#a78bfa" />
+            <StatCard label="Months Tracked" value={stats.months}       color="#06b6d4" />
+            <StatCard label="Total Saved"    value={stats.saved}        color="#34d399" />
+            <StatCard label="Budgets Set"    value={stats.budgets}      color="#f59e0b" />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 20 }}>
@@ -231,21 +206,23 @@ export default function Profile() {
                       style={{ ...inputStyle, resize: "vertical", minHeight: 80, lineHeight: 1.5 }} />
                   ) : (
                     <div style={{ fontSize: 14, color: "#d1d5db", padding: "11px 14px", background: "rgba(255,255,255,0.03)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", lineHeight: 1.6 }}>
-                      {form.bio || <span style={{ color: "#4b5563" }}>Add a bio...</span>}
+                      {form.bio || <span style={{ color: "#4b5563" }}>Not set</span>}
                     </div>
                   )}
                 </div>
 
                 {/* Error message */}
-                {error && (
+                {saveError && (
                   <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#f87171" }}>
-                    {error}
+                    {saveError}
                   </div>
                 )}
 
                 {editing && (
-                  <button onClick={handleSave} disabled={loading} style={{ width: "100%", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "#fff", border: "none", borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 20px rgba(124,58,237,0.35)", transition: "all 0.2s" }}>
-                    <Check size={15} /> {loading ? "Saving..." : "Save Changes"}
+                  <button onClick={handleSave} style={{ width: "100%", background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "#fff", border: "none", borderRadius: 10, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 20px rgba(124,58,237,0.35)", transition: "all 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
+                    <Check size={15} /> Save Changes
                   </button>
                 )}
               </div>
@@ -258,9 +235,9 @@ export default function Profile() {
                   <Shield size={16} color="#a78bfa" /> Account Security
                 </div>
                 {[
-                  { label: "Password", value: "Update your password", action: "Change" },
-                  { label: "Two-Factor Auth", value: "Not enabled", action: "Enable" },
-                  { label: "Login Sessions", value: "1 active session", action: "Manage" },
+                  { label: "Password",        value: "Last changed 30 days ago", action: "Change" },
+                  { label: "Two-Factor Auth",  value: "Not enabled",              action: "Enable" },
+                  { label: "Login Sessions",   value: "1 active session",         action: "Manage" },
                 ].map(({ label, value, action }) => (
                   <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                     <div>

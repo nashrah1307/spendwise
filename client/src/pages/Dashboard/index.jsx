@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   TrendingUp, Target, ArrowUpRight, ArrowDownRight
 } from "lucide-react"
@@ -86,6 +87,7 @@ function SummaryCard({ title, value, sub, trend, color, icon: Icon }) {
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────
 export default function Dashboard() {
+  const navigate = useNavigate()
   const availableMonths = getAvailableMonths(6)
   const [selectedMonth, setSelectedMonth] = useState(availableMonths[0].value)
 
@@ -278,7 +280,7 @@ export default function Dashboard() {
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>Recent Transactions</div>
                   <div style={{ fontSize: 12, color: "#6b7280" }}>Your last 5 activities</div>
                 </div>
-                <button style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 8, color: "#a78bfa", fontSize: 12, fontWeight: 600, padding: "6px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
+                <button onClick={() => navigate("/transactions")} style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 8, color: "#a78bfa", fontSize: 12, fontWeight: 600, padding: "6px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
                   View All
                 </button>
               </div>
@@ -331,7 +333,7 @@ export default function Dashboard() {
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>Budget Overview</div>
                   <div style={{ fontSize: 12, color: "#6b7280" }}>{selectedMonthLabel}</div>
                 </div>
-                <button style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 8, color: "#a78bfa", fontSize: 12, fontWeight: 600, padding: "6px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
+                <button onClick={() => navigate("/budget")} style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 8, color: "#a78bfa", fontSize: 12, fontWeight: 600, padding: "6px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
                   Manage
                 </button>
               </div>

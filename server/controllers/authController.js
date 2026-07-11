@@ -1,41 +1,33 @@
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
 
-// ── Helper: generate JWT token ─────────────────────────────────────────────
-// We call this after login and signup to give the user a token
 const generateToken = (id) => {
-  return jwt.sign(
-    { id },                          // payload — what we store inside the token
-    process.env.JWT_SECRET,          // secret key to sign the token
-    { expiresIn: "30d" }             // token expires in 30 days
-  )
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" })
 }
 
-// ── @route   POST /api/auth/signup ────────────────────────────────────────
-// ── @access  Public (no token needed)
 export const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body
 
-    // Check all fields are provided
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Please fill in all fields" })
     }
 
-    // Check if user already exists
     const userExists = await User.findOne({ email })
     if (userExists) {
       return res.status(400).json({ message: "Email already registered" })
     }
 
-    // Create the user (password gets hashed automatically via User model)
     const user = await User.create({ name, email, password })
 
-    // Send back user info + token
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      location: user.location,
+      dob: user.dob,
+      bio: user.bio,
       plan: user.plan,
       token: generateToken(user._id),
     })
@@ -45,8 +37,6 @@ export const signup = async (req, res) => {
   }
 }
 
-// ── @route   POST /api/auth/login ─────────────────────────────────────────
-// ── @access  Public (no token needed)
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body
@@ -55,23 +45,24 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Please fill in all fields" })
     }
 
-    // Find user by email
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" })
     }
 
-    // Check if password matches (uses matchPassword method from User model)
     const isMatch = await user.matchPassword(password)
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" })
     }
 
-    // Send back user info + token
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      location: user.location,
+      dob: user.dob,
+      bio: user.bio,
       plan: user.plan,
       token: generateToken(user._id),
     })
@@ -81,21 +72,21 @@ export const login = async (req, res) => {
   }
 }
 
-// ── @route   GET /api/auth/me ─────────────────────────────────────────────
-// ── @access  Protected (token required)
 export const getMe = async (req, res) => {
-  // req.user is set by authMiddleware
   res.json({
     _id: req.user._id,
     name: req.user.name,
     email: req.user.email,
+    phone: req.user.phone,
+    location: req.user.location,
+    dob: req.user.dob,
+    bio: req.user.bio,
     plan: req.user.plan,
     currency: req.user.currency,
   })
 }
 
-// ── @route   PUT /api/auth/profile ────────────────────────────────────────
-// ── @access  Protected (token required)
+// ── UPDATED: now saves phone, location, dob, bio too ────────────────────────
 export const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
@@ -104,12 +95,14 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" })
     }
 
-    // Update only the fields that were sent
-    user.name     = req.body.name     || user.name
-    user.email    = req.body.email    || user.email
-    user.currency = req.body.currency || user.currency
+    user.name     = req.body.name     ?? user.name
+    user.email    = req.body.email    ?? user.email
+    user.phone    = req.body.phone    ?? user.phone
+    user.location = req.body.location ?? user.location
+    user.dob      = req.body.dob      ?? user.dob
+    user.bio      = req.body.bio      ?? user.bio
+    user.currency = req.body.currency ?? user.currency
 
-    // If new password is provided, update it (will be hashed by model)
     if (req.body.password) {
       user.password = req.body.password
     }
@@ -120,6 +113,10 @@ export const updateProfile = async (req, res) => {
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
+      phone: updatedUser.phone,
+      location: updatedUser.location,
+      dob: updatedUser.dob,
+      bio: updatedUser.bio,
       plan: updatedUser.plan,
       token: generateToken(updatedUser._id),
     })
