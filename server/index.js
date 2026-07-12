@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import rateLimit from "express-rate-limit"
-import mongoSanitize from "express-mongo-sanitize"
+// import mongoSanitize from "express-mongo-sanitize"
 import connectDB from "./config/db.js"
 import authRoutes from "./routes/authRoutes.js"
 import transactionRoutes from "./routes/transactionRoutes.js"
@@ -23,8 +23,26 @@ app.use(express.json())
 // ── NEW: strip out any $ or . operators from request data ──────────────────
 // Protects against NoSQL injection, e.g. someone sending
 // { "email": { "$gt": "" } } to bypass login checks
-app.use(mongoSanitize())
+// ── Custom sanitizer (replaces express-mongo-sanitize) ──────────────────────
+// Recursively strips out any keys starting with $ or containing a dot,
+// which are used in NoSQL injection attacks
+function sanitize(obj) {
+  if (obj && typeof obj === "object") {
+    for (const key in obj) {
+      if (key.startsWith("$") || key.includes(".")) {
+        delete obj[key]
+      } else if (typeof obj[key] === "object") {
+        sanitize(obj[key])
+      }
+    }
+  }
+  return obj
+}
 
+app.use((req, res, next) => {
+  if (req.body) sanitize(req.body)
+  next()
+})
 // ── NEW: rate limiting ───────────────────────────────────────────────────────
 // General limiter: 100 requests per 15 min per IP for all routes
 const generalLimiter = rateLimit({
