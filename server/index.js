@@ -18,6 +18,11 @@ const allowedOrigins = [
   "https://spendwise-xxxx.vercel.app", // ← replace with your actual Vercel URL
 ]
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://spendwise-red-three.vercel.app",
+]
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
