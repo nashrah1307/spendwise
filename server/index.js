@@ -15,11 +15,6 @@ const app = express()
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://spendwise-xxxx.vercel.app", // ← replace with your actual Vercel URL
-]
-
-const allowedOrigins = [
-  "http://localhost:5173",
   "https://spendwise-red-three.vercel.app",
 ]
 
