@@ -13,6 +13,8 @@ const navItems = [
 ]
 
 export default function Sidebar() {
+  const currentUser = JSON.parse(localStorage.getItem("spendwise_user") || "{}")
+  const getInitials = (name = "") => name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "U"
   const navigate = useNavigate()
   const handleLogout = () => {
   localStorage.removeItem("spendwise_user")
@@ -69,11 +71,14 @@ export default function Sidebar() {
         <div onClick={() => navigate("/profile")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, marginBottom: 4, cursor: "pointer", transition: "all 0.2s" }}
           onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
           onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-          <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "#fff", flexShrink: 0 }}>AR</div>
-          <div style={{ overflow: "hidden" }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Aisha Rahman</div>
-            <div style={{ fontSize: 11, color: "#6b7280" }}>Free Plan</div>
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "#fff", flexShrink: 0 }}>{getInitials(currentUser.name)}
           </div>
+            <div style={{ overflow: "hidden" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {currentUser.name || "User"}
+              </div>
+              <div style={{ fontSize: 11, color: "#6b7280" }}>{currentUser.plan === "pro" ? "Pro Plan" : "Free Plan"}</div>
+            </div>
         </div>
         <div onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, color: "#6b7280", cursor: "pointer", fontSize: 14, transition: "all 0.2s" }}
           onMouseEnter={e => { e.currentTarget.style.color = "#f87171"; e.currentTarget.style.background = "rgba(239,68,68,0.08)" }}

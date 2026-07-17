@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom"
 import { Bell } from "lucide-react"
 
 export default function TopBar({ title, subtitle, children }) {
+  const currentUser = JSON.parse(localStorage.getItem("spendwise_user") || "{}")
+  const getInitials = (name = "") => name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "U"
   const navigate = useNavigate()
 
   return (
@@ -35,7 +37,7 @@ export default function TopBar({ title, subtitle, children }) {
         <div onClick={() => navigate("/profile")} style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, color: "#fff", cursor: "pointer", transition: "opacity 0.2s" }}
           onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-          AR
+          {getInitials(currentUser.name)}
         </div>
       </div>
     </div>
