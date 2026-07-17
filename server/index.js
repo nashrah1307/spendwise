@@ -16,11 +16,17 @@ const app = express()
 const allowedOrigins = [
   "http://localhost:5173",
   "https://spendwise-red-three.vercel.app",
+  "https://spendwise-allwave.vercel.app/signup",
 ]
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const allowed =
+      !origin ||
+      origin === "http://localhost:5173" ||
+      origin.endsWith(".vercel.app")   // allows any Vercel preview/production URL
+    
+    if (allowed) {
       callback(null, true)
     } else {
       callback(new Error("Not allowed by CORS"))
