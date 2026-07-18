@@ -643,6 +643,23 @@ export default function Auth() {
                     </div>
                   )}
 
+                  {/* Forgot password — login only */}
+                  {isLogin && (
+                    <div style={{ textAlign: "right", marginTop: 6 }}>
+                      <span
+                        onClick={() => navigate("/forgot-password")}
+                        style={{
+                          fontSize: 12,
+                          color: "#a78bfa",
+                          cursor: "pointer",
+                          fontWeight: 600,
+                        }}
+                      >
+                        Forgot password?
+                      </span>
+                    </div>
+                  )}
+
                   {/* Password strength — signup only */}
                   {!isLogin && form.password && (
                     <div style={{ marginTop: 8 }}>

@@ -8,6 +8,8 @@ import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
 import Notifications from './pages/Notifications'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 // ── Simple auth guard (replace with real auth later) ──
 const isLoggedIn = () => {
@@ -28,6 +30,8 @@ function App() {
         <Route path="/"        element={<Landing />} />
         <Route path="/login"   element={<Auth />} />
         <Route path="/signup"  element={<Auth />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Protected routes */}
         <Route path="/dashboard"    element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

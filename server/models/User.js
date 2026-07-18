@@ -19,24 +19,17 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: 6,
   },
-  avatar: {
-    type: String,
-    default: "",
-  },
-  // ── NEW: profile fields ──────────────────────────────────────────────────
+  avatar: { type: String, default: "" },
   phone: { type: String, default: "", trim: true },
   location: { type: String, default: "", trim: true },
-  dob: { type: String, default: "" }, // stored as "YYYY-MM-DD" string
+  dob: { type: String, default: "" },
   bio: { type: String, default: "", trim: true, maxlength: 300 },
-  currency: {
-    type: String,
-    default: "INR",
-  },
-  plan: {
-    type: String,
-    enum: ["free", "pro"],
-    default: "free",
-  },
+  currency: { type: String, default: "INR" },
+  plan: { type: String, enum: ["free", "pro"], default: "free" },
+
+  // ── NEW: password reset fields ──────────────────────────────────────────
+  resetPasswordToken: { type: String, default: undefined },
+  resetPasswordExpire: { type: Date, default: undefined },
 }, {
   timestamps: true,
 })

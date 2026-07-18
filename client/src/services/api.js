@@ -1,8 +1,5 @@
 import axios from "axios"
 
-// ── Base URL now comes from .env instead of being hardcoded ────────────────
-// This means when you deploy later, you just change the .env value —
-// no code changes needed.
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
 
 const api = axios.create({
@@ -35,6 +32,9 @@ export const authAPI = {
   login:  (data) => api.post("/auth/login", data),
   getMe:  ()     => api.get("/auth/me"),
   updateProfile: (data) => api.put("/auth/profile", data),
+  // ── NEW ──────────────────────────────────────────────────────────────────
+  forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
+  resetPassword: (token, password) => api.put(`/auth/reset-password/${token}`, { password }),
 }
 
 export const transactionAPI = {
