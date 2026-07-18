@@ -317,32 +317,11 @@ export default function Budget() {
     fetchBudgets();
   }, [month]);
 
-  const getCurrentMonthKey = (monthLabel) => {
-    // Convert "March 2026" → "2026-03"
-    const months = {
-      January: "01",
-      February: "02",
-      March: "03",
-      April: "04",
-      May: "05",
-      June: "06",
-      July: "07",
-      August: "08",
-      September: "09",
-      October: "10",
-      November: "11",
-      December: "12",
-    };
-    const [monthName, year] = monthLabel.split(" ");
-    return `${year}-${months[monthName]}`;
-  };
-
   const fetchBudgets = async () => {
-    setPageLoading(true);
-    setPageError(null);
-    try {
-      const monthKey = getCurrentMonthKey(month);
-      const res = await budgetAPI.getAll(monthKey);
+  setPageLoading(true)
+  setPageError(null)
+  try {
+    const res = await budgetAPI.getAll(month)   // ← use month directly
       setBudgets(res.data);
     } catch (err) {
       setPageError(err.response?.data?.message || "Failed to load budgets");
@@ -374,19 +353,15 @@ export default function Budget() {
   };
 
   const handleAdd = async () => {
-    const e = validate();
-    if (Object.keys(e).length) {
-      setErrors(e);
-      return;
-    }
+  const e = validate()
+  if (Object.keys(e).length) { setErrors(e); return }
 
-    try {
-      const monthKey = getCurrentMonthKey(month);
-      const res = await budgetAPI.create({
-        category: form.category,
-        limit: Number(form.limit),
-        spent: Number(form.spent) || 0,
-        month: monthKey,
+  try {
+    const res = await budgetAPI.create({
+      category: form.category,
+      limit: Number(form.limit),
+      spent: Number(form.spent) || 0,
+      month: month,   // ← use month directly
         color: CATEGORY_COLORS[form.category] || "#9ca3af",
       });
       setBudgets((bs) => [...bs, res.data]);
