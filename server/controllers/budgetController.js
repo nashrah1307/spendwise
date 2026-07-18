@@ -56,12 +56,15 @@ export const createBudget = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$amount" } } }
     ])
 
-    const spent = spentData[0]?.total || 0
+    const calculatedSpent = spentData[0]?.total || 0
+    const manualSpent = Number(req.body.spent) || 0
+    // Use whichever is higher — real transactions or manually entered amount
+    const spent = Math.max(calculatedSpent, manualSpent)
 
     const budget = await Budget.create({
       user: req.user._id,
       category, limit, month, color,
-      spent, // auto-filled from transactions
+      spent,
     })
 
     res.status(201).json(budget)
