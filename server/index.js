@@ -12,6 +12,17 @@ dotenv.config()
 connectDB()
 
 const app = express()
+// ── NEW: disable caching for all API responses ─────────────────────────────
+// By default Express auto-generates ETags, which makes browsers send
+// "if this hasn't changed, just give me the cached version" requests.
+// For user-specific data like budgets/transactions, this causes stale/wrong
+// data to be shown across different logins. Turning this off forces every
+// request to always hit the server fresh.
+app.disable('etag')
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store')
+  next()
+})
 
 const allowedOrigins = [
   "http://localhost:5173",
