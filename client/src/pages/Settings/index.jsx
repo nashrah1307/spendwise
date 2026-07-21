@@ -106,11 +106,12 @@ export default function Settings() {
         @keyframes modalPop { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
         .page-animate { animation: fadeUp 0.5s ease; }
         select option { background: #13102a; color: #fff; }
+        @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
 
       <Sidebar />
 
-      <main style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
         <TopBar title="Settings" subtitle="Manage your app preferences">
           <button onClick={handleSave} style={{ background: "linear-gradient(135deg,#7c3aed,#6d28d9)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", boxShadow: "0 4px 14px rgba(124,58,237,0.3)", transition: "all 0.2s" }}
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}

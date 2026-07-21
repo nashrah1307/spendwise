@@ -208,7 +208,7 @@ export default function Reports() {
   if (pageLoading) return (
     <div style={{ background: "#08080f", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <LoadingSpinner />
       </main>
     </div>
@@ -217,7 +217,7 @@ export default function Reports() {
   if (pageError) return (
     <div style={{ background: "#08080f", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ErrorMessage message={pageError} onRetry={fetchReportData} />
       </main>
     </div>
@@ -233,11 +233,12 @@ export default function Reports() {
         .recharts-tooltip-cursor { fill: rgba(124,58,237,0.06) !important; }
         .row-hover:hover { background: rgba(255,255,255,0.03) !important; }
         select option { background: #13102a; color: #fff; }
+        @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
 
       <Sidebar />
 
-      <main style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
         <TopBar title="Reports" subtitle="Financial overview and insights">
           <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}
             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#d1d5db", padding: "7px 12px", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>

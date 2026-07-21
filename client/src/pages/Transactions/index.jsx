@@ -185,7 +185,7 @@ export default function Transactions() {
   if (pageLoading) return (
     <div style={{ background: "#08080f", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <LoadingSpinner />
       </main>
     </div>
@@ -194,7 +194,7 @@ export default function Transactions() {
   if (pageError) return (
     <div style={{ background: "#08080f", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ErrorMessage message={pageError} onRetry={fetchTransactions} />
       </main>
     </div>
@@ -213,11 +213,12 @@ export default function Transactions() {
         .filter-input:focus { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.08); }
         .row-hover:hover { background: rgba(255,255,255,0.03) !important; }
         select option { background: #13102a; color: #fff; }
+        @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
 
       <Sidebar />
 
-      <main style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
         <TopBar title="Transactions" subtitle={`${filtered.length} transactions found`} />
 
         <div className="page-animate" style={{ padding: 28 }}>

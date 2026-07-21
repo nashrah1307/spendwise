@@ -171,7 +171,7 @@ export default function Dashboard() {
   if (pageLoading) return (
     <div style={{ background: "#08080f", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <LoadingSpinner />
       </main>
     </div>
@@ -180,7 +180,7 @@ export default function Dashboard() {
   if (pageError) return (
     <div style={{ background: "#08080f", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex" }}>
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <ErrorMessage message={pageError} onRetry={() => window.location.reload()} />
       </main>
     </div>
@@ -196,6 +196,7 @@ export default function Dashboard() {
         .dash-animate-2 { animation: fadeUp 0.5s ease 0.1s forwards; opacity: 0; }
         .dash-animate-3 { animation: fadeUp 0.5s ease 0.2s forwards; opacity: 0; }
         .recharts-tooltip-cursor { fill: rgba(124,58,237,0.08) !important; }
+        @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
 
       <Sidebar />

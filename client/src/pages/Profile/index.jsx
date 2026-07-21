@@ -113,11 +113,12 @@ export default function Profile() {
         @keyframes successPop { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
         .page-animate { animation: fadeUp 0.5s ease; }
         .profile-input:focus { border-color: rgba(124,58,237,0.6) !important; background: rgba(124,58,237,0.08) !important; }
+        @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
 
       <Sidebar />
 
-      <main style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
         <TopBar title="Profile" subtitle="Manage your personal information" />
 
         <div className="page-animate" style={{ padding: 28, maxWidth: 900 }}>

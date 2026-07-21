@@ -157,11 +157,12 @@ export default function Notifications() {
         @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         .page-animate { animation: fadeUp 0.5s ease; }
         .notif-row:hover { background: rgba(255,255,255,0.03) !important; }
+        @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
 
       <Sidebar />
 
-      <main style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
         <TopBar title="Notifications" subtitle={unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"} />
 
         <div className="page-animate" style={{ padding: 28, maxWidth: 800 }}>

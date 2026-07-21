@@ -99,6 +99,7 @@ function CustomTooltip({ active, payload, label }) {
         >
           {p.name}: ₹{p.value.toLocaleString()}
         </div>
+        
       ))}
     </div>
   );
@@ -465,11 +466,12 @@ export default function Budget() {
         .budget-input:focus { border-color: rgba(124,58,237,0.6) !important; background: rgba(124,58,237,0.08) !important; outline: none; }
         select option { background: #13102a; color: #fff; }
         .recharts-tooltip-cursor { fill: rgba(124,58,237,0.06) !important; }
+        @media (max-width: 768px) { .main-content { margin-left: 0 !important; } }
       `}</style>
 
       <Sidebar />
 
-      <main style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 240, flex: 1, minHeight: "100vh" }}>
         {/* Top bar */}
         <Topbar
           title="Budget Planner"
